@@ -37,7 +37,7 @@ func externalHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isBillReleased(billId) {
-		internalBillingURL := strings.Replace("https://127.0.0.1/internal/billing/:billId", ":billId", billIdString, 1)
+		internalBillingURL := strings.Replace("http://127.0.0.1:8081/internal/billing/:billId", ":billId", billIdString, 1)
 		
 		req, _ := http.NewRequest("GET", internalBillingURL, nil)
 		req.Header.Set("Authorization", getBearerToken())
