@@ -32,7 +32,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	billIdString := strconv.FormatInt(billIdInt, 10)
 	if isAuthorized(billId, sessionId.Value) {
 		if billIdString != "0" {
-			releaseBillById(billId, 10*time.Second)
+			releaseBill(billId, 10*time.Second)
 		}
 	}
 
@@ -52,7 +52,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func releaseBillById(billId string, expiryTime time.Duration) {
+func releaseBill(billId string, expiryTime time.Duration) {
 	bill, exists := bills[billId]
 	if !exists {
 		bill = &Bill{}
@@ -130,12 +130,12 @@ func main() {
 	internalRouter.HandleFunc("/internal/billing/{billId}", handleInternalBillingRequest)
 
 	go func() {
-		if err := http.ListenAndServe(":8080", router); err != nil {
+		if err := http.ListenAndServe(":8081", internalRouter); err != nil {
 			log.Fatal(err)
-		}
+	        }
 	}()
 
-	if err := http.ListenAndServe(":8081", internalRouter); err != nil {
+	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatal(err)
-	}
+        }
 }
