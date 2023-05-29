@@ -19,7 +19,7 @@ type Bill struct {
 	Expiry   time.Time
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func externalHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	billId := vars["billId"]
 	sessionId, _ := r.Cookie("sessionId")
@@ -36,7 +36,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if IsBillReleased(billId) {
+	if isBillReleased(billId) {
 		internalBillingURL := strings.Replace("http://127.0.0.1:8081/internal/billing/:billId", ":billId", billIdString, 1)
 		
 		req, _ := http.NewRequest("GET", internalBillingURL, nil)
@@ -72,7 +72,7 @@ func releaseBill(billId string, expiryTime time.Duration) {
 	}()
 }
 
-func IsBillReleased(billId string) bool {
+func isBillReleased(billId string) bool {
 	bill, exists := bills[billId]
 	return exists && bill.Released
 }
@@ -91,7 +91,7 @@ func isAuthorized(billId string, sessionId string) bool {
 	return false
 }
 
-func handleInternalBillingRequest(w http.ResponseWriter, r *http.Request) {
+func internalHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	billId := vars["billId"]
 
@@ -123,11 +123,11 @@ func getBearerToken() string {
 
 
 func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/billing/{billId}", handler)
+	externalRouter := mux.NewRouter()
+	externalRouter.HandleFunc("/billing/{billId}", externalHandler)
 
 	internalRouter := mux.NewRouter()
-	internalRouter.HandleFunc("/internal/billing/{billId}", handleInternalBillingRequest)
+	internalRouter.HandleFunc("/internal/billing/{billId}", internalHandler)
 
 	go func() {
 		if err := http.ListenAndServe(":8081", internalRouter); err != nil {
@@ -135,7 +135,7 @@ func main() {
 	        }
 	}()
 
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	if err := http.ListenAndServe(":8080", externalRouter); err != nil {
 		log.Fatal(err)
         }
 }
