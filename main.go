@@ -40,7 +40,7 @@ func externalHandler(w http.ResponseWriter, r *http.Request) {
 		internalBillingURL := strings.Replace("http://127.0.0.1:8081/internal/billing/:billId", ":billId", billIdString, 1)
 		
 		req, _ := http.NewRequest("GET", internalBillingURL, nil)
-		req.Header.Set("Authorization", getBearerToken())
+		req.Header.Set("Authorization", getToken())
 		client := &http.Client{}
 		resp, _ := client.Do(req)
 	
@@ -117,8 +117,8 @@ func isAuthenticated(sessionId string) bool {
 }
 
 
-func getBearerToken() string {
-	return "bearer_token"
+func getToken() string {
+	return "token"
 }
 
 
