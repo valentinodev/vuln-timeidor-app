@@ -32,7 +32,7 @@ func externalHandler(w http.ResponseWriter, r *http.Request) {
 	billIdString := strconv.FormatInt(billIdInt, 10)
 	if isAuthorized(billId, sessionId.Value) {
 		if billIdString != "0" {
-			releaseBill(billId, 10*time.Second)
+			releaseBill(billId, 1800*time.Second)
 		}
 	}
 
